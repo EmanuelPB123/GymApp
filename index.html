@@ -1,1 +1,532 @@
+<html><head><base href=".">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymTracker Pro</title>
+  <style>
+    * {
+      box-sizing: border-box;  
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
 
+    body {
+      background: #1a1a1a;
+      color: white; 
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .exercise-form {
+      background: #2d2d2d;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      background: #3d3d3d;
+      color: white;
+      margin-top: 0.3rem;
+    }
+
+    button {
+      background: #4ecdc4;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      width: 100%;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .workout-list {
+      background: #2d2d2d;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .workout-item {
+      background: #3d3d3d;
+      padding: 1rem;
+      border-radius: 5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .delete-btn {
+      background: #ff6b6b;
+      padding: 0.4rem 0.8rem;
+      width: auto;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-card {
+      background: #3d3d3d;
+      padding: 1rem;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #4ecdc4;
+    }
+
+    .workout-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .series-count {
+      color: #4ecdc4;
+      font-weight: bold;
+    }
+
+    .exercise-group {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #3d3d3d;
+      border-radius: 8px;
+    }
+
+    .sets-section {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .sets-section input {
+      flex: 1;
+    }
+
+    .custom-exercise {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #4d4d4d;
+    }
+
+    .custom-exercise input {
+      margin-bottom: 0.5rem;
+    }
+
+    .custom-exercise small {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .manage-exercises {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #4d4d4d;
+    }
+
+    .exercise-list {
+      margin-top: 0.5rem;
+    }
+
+    .exercise-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      background: #3d3d3d;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+    }
+
+    .charts {
+      background: #2d2d2d;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>&#x1f4aa; GymTracker Pro</h1>
+      <p>Tu compa&#xf1;ero de entrenamiento</p>
+    </div>
+
+    <div class="exercise-form">
+      <h2>Registrar Ejercicio</h2>
+      <div class="form-group">
+        <label for="exercise">Ejercicio:</label>
+        <select id="exercise" onchange="checkCustomExercise()">
+          <option value="press_banca">Press de Banca</option>
+          <option value="sentadillas">Sentadillas</option>
+          <option value="peso_muerto">Peso Muerto</option>
+          <option value="dominadas">Dominadas</option>
+          <option value="curl_biceps">Curl de B&#xed;ceps</option>
+          <option value="custom">A&#xf1;adir Nuevo Ejercicio</option>
+        </select>
+        <div id="customExerciseInput" class="custom-exercise" style="display: none;">
+          <input type="text" id="customExerciseName" placeholder="Nombre del nuevo ejercicio" maxlength="30">
+          <small style="color: #999; display: block; margin-top: 0.3rem;">
+            Ingresa un nombre &#xfa;nico para el nuevo ejercicio
+          </small>
+        </div>
+
+        <div class="manage-exercises">
+          <h3>Gestionar Ejercicios</h3>
+          <div id="exerciseList" class="exercise-list"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="weight">Peso (kg):</label>
+        <input type="number" id="weight" min="0" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>Repeticiones:</label>
+        <div class="sets-section">
+          <input type="number" id="reps" min="1" placeholder="Cantidad">
+          <input type="number" id="sets" min="1" placeholder="Series">
+        </div>
+      </div>
+      <button onclick="addWorkout()">Guardar Serie</button>
+    </div>
+
+    <div class="workout-list">
+      <h2>Ejercicios Registrados</h2>
+      <div id="workouts"></div>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="totalSeries">0</div>
+          <div>Series</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalReps">0</div>
+          <div>Repeticiones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgWeight">0</div>
+          <div>Peso Promedio</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <h2>Estad&#xed;sticas</h2>
+      <div class="chart-container">
+        <canvas id="weightChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="exerciseDistribution"></canvas>
+      </div>
+    </div>
+    <button onclick="exportToExcel()" style="margin-top: 1rem;">Exportar a Excel</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script defer>let workouts = [];
+let exercises = [{
+  id: 'press_banca',
+  name: 'Press de Banca'
+}, {
+  id: 'sentadillas',
+  name: 'Sentadillas'
+}, {
+  id: 'peso_muerto',
+  name: 'Peso Muerto'
+}, {
+  id: 'dominadas',
+  name: 'Dominadas'
+}, {
+  id: 'curl_biceps',
+  name: 'Curl de Bíceps'
+}];
+let weightChart = null;
+let distributionChart = null;
+function updateExerciseList() {
+  const exerciseList = document.getElementById('exerciseList');
+  exerciseList.innerHTML = '';
+  exercises.forEach(exercise => {
+    if (exercise.id !== 'custom') {
+      const exerciseItem = document.createElement('div');
+      exerciseItem.className = 'exercise-item';
+      exerciseItem.innerHTML = `
+            <span>${exercise.name}</span>
+            <button class="delete-btn" onclick="deleteExercise('${exercise.id}')">🗑️</button>
+          `;
+      exerciseList.appendChild(exerciseItem);
+    }
+  });
+}
+function deleteExercise(exerciseId) {
+  const isUsed = workouts.some(workout => workout.exercise === exerciseId);
+  if (isUsed) {
+    alert('No se puede eliminar un ejercicio que está siendo usado en los registros');
+    return;
+  }
+  exercises = exercises.filter(e => e.id !== exerciseId);
+  const exerciseSelect = document.getElementById('exercise');
+  Array.from(exerciseSelect.options).forEach(option => {
+    if (option.value === exerciseId) {
+      exerciseSelect.remove(option.index);
+    }
+  });
+  updateExerciseList();
+  saveToLocalStorage();
+}
+function checkCustomExercise() {
+  const exerciseSelect = document.getElementById('exercise');
+  const customExerciseInput = document.getElementById('customExerciseInput');
+  if (exerciseSelect.value === 'custom') {
+    customExerciseInput.style.display = 'block';
+  } else {
+    customExerciseInput.style.display = 'none';
+  }
+}
+function addWorkout() {
+  const exerciseSelect = document.getElementById('exercise');
+  const customExerciseName = document.getElementById('customExerciseName');
+  let exercise = exerciseSelect.value;
+  if (exercise === 'custom') {
+    if (!customExerciseName.value.trim()) {
+      alert('Por favor ingresa el nombre del nuevo ejercicio');
+      return;
+    }
+    const exerciseName = customExerciseName.value.trim();
+    if (exercises.some(e => e.name.toLowerCase() === exerciseName.toLowerCase())) {
+      alert('Este ejercicio ya existe');
+      return;
+    }
+    exercise = exerciseName.toLowerCase().replace(/\s+/g, '_');
+    exercises.push({
+      id: exercise,
+      name: exerciseName
+    });
+    const option = new Option(exerciseName, exercise);
+    exerciseSelect.add(option, exerciseSelect.length - 1);
+    updateExerciseList();
+  }
+  const weight = parseFloat(document.getElementById('weight').value);
+  const reps = parseInt(document.getElementById('reps').value);
+  const sets = parseInt(document.getElementById('sets').value);
+  if (!weight || !reps || !sets) {
+    alert('Por favor completa todos los campos');
+    return;
+  }
+  const workout = {
+    id: Date.now(),
+    exercise,
+    weight,
+    reps,
+    sets,
+    date: new Date().toLocaleDateString()
+  };
+  workouts.unshift(workout);
+  updateUI();
+  resetForm();
+  exerciseSelect.value = exercise;
+  customExerciseName.value = '';
+  customExerciseInput.style.display = 'none';
+  saveToLocalStorage();
+}
+function deleteWorkout(id) {
+  workouts = workouts.filter(w => w.id !== id);
+  updateUI();
+  saveToLocalStorage();
+}
+function groupWorkoutsByExercise() {
+  const grouped = {};
+  workouts.forEach(workout => {
+    if (!grouped[workout.exercise]) {
+      grouped[workout.exercise] = [];
+    }
+    grouped[workout.exercise].push(workout);
+  });
+  return grouped;
+}
+function updateUI() {
+  const workoutsDiv = document.getElementById('workouts');
+  workoutsDiv.innerHTML = '';
+  const groupedWorkouts = groupWorkoutsByExercise();
+  for (const [exercise, workoutList] of Object.entries(groupedWorkouts)) {
+    const exerciseObj = exercises.find(e => e.id === exercise) || {
+      name: exercise.replace(/_/g, ' ')
+    };
+    const exerciseName = exerciseObj.name;
+    const exerciseDiv = document.createElement('div');
+    exerciseDiv.className = 'exercise-group';
+    exerciseDiv.innerHTML = `
+          <div class="workout-header">
+            <h3>${exerciseName}</h3>
+            <span class="series-count">${workoutList.length} series</span>
+          </div>
+        `;
+    workoutList.forEach(workout => {
+      const workoutElement = document.createElement('div');
+      workoutElement.className = 'workout-item';
+      workoutElement.innerHTML = `
+            <div class="workout-header">
+              <div>
+                ${workout.weight}kg x ${workout.reps} reps x ${workout.sets} series
+                <br><small>${workout.date}</small>
+              </div>
+              <button class="delete-btn" onclick="deleteWorkout(${workout.id})">🗑️</button>
+            </div>
+          `;
+      exerciseDiv.appendChild(workoutElement);
+    });
+    workoutsDiv.appendChild(exerciseDiv);
+  }
+  document.getElementById('totalSeries').textContent = workouts.length;
+  const totalReps = workouts.reduce((sum, w) => sum + w.reps * w.sets, 0);
+  document.getElementById('totalReps').textContent = totalReps;
+  const avgWeight = workouts.length ? (workouts.reduce((sum, w) => sum + w.weight, 0) / workouts.length).toFixed(1) : "0";
+  document.getElementById('avgWeight').textContent = avgWeight;
+  createCharts();
+}
+function resetForm() {
+  document.getElementById('weight').value = '';
+  document.getElementById('reps').value = '';
+  document.getElementById('sets').value = '';
+}
+function createCharts() {
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js not loaded');
+    return;
+  }
+  const weightCtx = document.getElementById('weightChart').getContext('2d');
+  const distributionCtx = document.getElementById('exerciseDistribution').getContext('2d');
+  if (weightChart) weightChart.destroy();
+  if (distributionChart) distributionChart.destroy();
+  const weightData = workouts.slice().reverse().map(w => ({
+    x: w.date,
+    y: w.weight
+  }));
+  weightChart = new Chart(weightCtx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Progresión de Peso',
+        data: weightData,
+        borderColor: '#4ecdc4',
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Peso (kg)'
+          }
+        }
+      }
+    }
+  });
+  const groupedWorkouts = groupWorkoutsByExercise();
+  const exerciseLabels = Object.keys(groupedWorkouts).map(ex => {
+    const exerciseObj = exercises.find(e => e.id === ex) || {
+      name: ex.replace(/_/g, ' ')
+    };
+    return exerciseObj.name;
+  });
+  const exerciseCounts = Object.values(groupedWorkouts).map(group => group.length);
+  distributionChart = new Chart(distributionCtx, {
+    type: 'doughnut',
+    data: {
+      labels: exerciseLabels,
+      datasets: [{
+        data: exerciseCounts,
+        backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7af', '#3ca299', '#348d86']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right'
+        },
+        title: {
+          display: true,
+          text: 'Distribución de Ejercicios'
+        }
+      }
+    }
+  });
+}
+function saveToLocalStorage() {
+  localStorage.setItem('gymTrackerWorkouts', JSON.stringify(workouts));
+  localStorage.setItem('gymTrackerExercises', JSON.stringify(exercises));
+}
+function loadFromLocalStorage() {
+  const savedWorkouts = localStorage.getItem('gymTrackerWorkouts');
+  const savedExercises = localStorage.getItem('gymTrackerExercises');
+  if (savedWorkouts) {
+    workouts = JSON.parse(savedWorkouts);
+  }
+  if (savedExercises) {
+    exercises = JSON.parse(savedExercises);
+  }
+  updateUI();
+  updateExerciseList();
+}
+function exportToExcel() {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Fecha,Ejercicio,Peso (kg),Repeticiones,Series\n";
+  workouts.forEach(workout => {
+    const exerciseName = exercises.find(e => e.id === workout.exercise)?.name || workout.exercise;
+    csvContent += `${workout.date},${exerciseName},${workout.weight},${workout.reps},${workout.sets}\n`;
+  });
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "gym_tracker_progress.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+updateUI();
+updateExerciseList();
+document.addEventListener('DOMContentLoaded', loadFromLocalStorage);</script>
+</body></html>
