@@ -261,7 +261,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script defer>let workouts = [];
+  <script defer>document.addEventListener('DOMContentLoaded', loadFromLocalStorage);
+let workouts = [];
 let exercises = [{
   id: 'press_banca',
   name: 'Press de Banca'
@@ -340,8 +341,10 @@ function addWorkout() {
       name: exerciseName
     });
     const option = new Option(exerciseName, exercise);
-    exerciseSelect.add(option, exerciseSelect.length - 1);
+    const customOption = exerciseSelect.querySelector('option[value="custom"]');
+    exerciseSelect.insertBefore(option, customOption);
     updateExerciseList();
+    saveToLocalStorage();
   }
   const weight = parseFloat(document.getElementById('weight').value);
   const reps = parseInt(document.getElementById('reps').value);
@@ -507,6 +510,18 @@ function loadFromLocalStorage() {
   }
   if (savedExercises) {
     exercises = JSON.parse(savedExercises);
+    const exerciseSelect = document.getElementById('exercise');
+    const customOption = exerciseSelect.querySelector('option[value="custom"]');
+    while (exerciseSelect.firstChild) {
+      if (exerciseSelect.firstChild.value === 'custom') {
+        break;
+      }
+      exerciseSelect.removeChild(exerciseSelect.firstChild);
+    }
+    exercises.forEach(exercise => {
+      const option = new Option(exercise.name, exercise.id);
+      exerciseSelect.insertBefore(option, customOption);
+    });
   }
   updateUI();
   updateExerciseList();
@@ -527,6 +542,5 @@ function exportToExcel() {
   document.body.removeChild(link);
 }
 updateUI();
-updateExerciseList();
-document.addEventListener('DOMContentLoaded', loadFromLocalStorage);</script>
+updateExerciseList();</script>
 </body></html>
