@@ -167,6 +167,11 @@
       background: #3d3d3d;
       margin-bottom: 0.5rem;
       border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .exercise-item:hover {
+      background: #4d4d4d;
     }
 
     .charts {
@@ -261,8 +266,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script defer>document.addEventListener('DOMContentLoaded', loadFromLocalStorage);
-let workouts = [];
+  <script defer>let workouts = [];
 let exercises = [{
   id: 'press_banca',
   name: 'Press de Banca'
@@ -290,18 +294,30 @@ function updateExerciseList() {
       exerciseItem.className = 'exercise-item';
       exerciseItem.innerHTML = `
             <span>${exercise.name}</span>
-            <button class="delete-btn" onclick="deleteExercise('${exercise.id}')">🗑️</button>
+            <button class="delete-btn" onclick="deleteExercise(event, '${exercise.id}')">🗑️</button>
           `;
+      exerciseItem.addEventListener('click', (e) => {
+        // Prevent triggering when clicking delete button
+        if (!e.target.classList.contains('delete-btn')) {
+          const exerciseSelect = document.getElementById('exercise');
+          exerciseSelect.value = exercise.id;
+          checkCustomExercise();
+        }
+      });
       exerciseList.appendChild(exerciseItem);
     }
   });
 }
-function deleteExercise(exerciseId) {
+function deleteExercise(event, exerciseId) {
+  // Prevent event bubbling
+  event.stopPropagation();
+  
   const isUsed = workouts.some(workout => workout.exercise === exerciseId);
   if (isUsed) {
     alert('No se puede eliminar un ejercicio que está siendo usado en los registros');
     return;
   }
+  
   exercises = exercises.filter(e => e.id !== exerciseId);
   const exerciseSelect = document.getElementById('exercise');
   Array.from(exerciseSelect.options).forEach(option => {
@@ -341,10 +357,8 @@ function addWorkout() {
       name: exerciseName
     });
     const option = new Option(exerciseName, exercise);
-    const customOption = exerciseSelect.querySelector('option[value="custom"]');
-    exerciseSelect.insertBefore(option, customOption);
+    exerciseSelect.add(option, exerciseSelect.length - 1);
     updateExerciseList();
-    saveToLocalStorage();
   }
   const weight = parseFloat(document.getElementById('weight').value);
   const reps = parseInt(document.getElementById('reps').value);
@@ -510,18 +524,6 @@ function loadFromLocalStorage() {
   }
   if (savedExercises) {
     exercises = JSON.parse(savedExercises);
-    const exerciseSelect = document.getElementById('exercise');
-    const customOption = exerciseSelect.querySelector('option[value="custom"]');
-    while (exerciseSelect.firstChild) {
-      if (exerciseSelect.firstChild.value === 'custom') {
-        break;
-      }
-      exerciseSelect.removeChild(exerciseSelect.firstChild);
-    }
-    exercises.forEach(exercise => {
-      const option = new Option(exercise.name, exercise.id);
-      exerciseSelect.insertBefore(option, customOption);
-    });
   }
   updateUI();
   updateExerciseList();
@@ -542,5 +544,6 @@ function exportToExcel() {
   document.body.removeChild(link);
 }
 updateUI();
-updateExerciseList();</script>
+updateExerciseList();
+document.addEventListener('DOMContentLoaded', loadFromLocalStorage);</script>
 </body></html>
