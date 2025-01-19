@@ -296,8 +296,7 @@ function updateExerciseList() {
             <span>${exercise.name}</span>
             <button class="delete-btn" onclick="deleteExercise(event, '${exercise.id}')">🗑️</button>
           `;
-      exerciseItem.addEventListener('click', (e) => {
-        // Prevent triggering when clicking delete button
+      exerciseItem.addEventListener('click', e => {
         if (!e.target.classList.contains('delete-btn')) {
           const exerciseSelect = document.getElementById('exercise');
           exerciseSelect.value = exercise.id;
@@ -309,15 +308,12 @@ function updateExerciseList() {
   });
 }
 function deleteExercise(event, exerciseId) {
-  // Prevent event bubbling
   event.stopPropagation();
-  
   const isUsed = workouts.some(workout => workout.exercise === exerciseId);
   if (isUsed) {
     alert('No se puede eliminar un ejercicio que está siendo usado en los registros');
     return;
   }
-  
   exercises = exercises.filter(e => e.id !== exerciseId);
   const exerciseSelect = document.getElementById('exercise');
   Array.from(exerciseSelect.options).forEach(option => {
@@ -378,7 +374,6 @@ function addWorkout() {
   workouts.unshift(workout);
   updateUI();
   resetForm();
-  exerciseSelect.value = exercise;
   customExerciseName.value = '';
   customExerciseInput.style.display = 'none';
   saveToLocalStorage();
@@ -524,6 +519,13 @@ function loadFromLocalStorage() {
   }
   if (savedExercises) {
     exercises = JSON.parse(savedExercises);
+    const exerciseSelect = document.getElementById('exercise');
+    exercises.forEach(exercise => {
+      if (!Array.from(exerciseSelect.options).some(opt => opt.value === exercise.id)) {
+        const option = new Option(exercise.name, exercise.id);
+        exerciseSelect.add(option, exerciseSelect.length - 1);
+      }
+    });
   }
   updateUI();
   updateExerciseList();
